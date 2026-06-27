@@ -5,7 +5,7 @@
     <parent>
         <artifactId>gemini-blueprint</artifactId>
         <groupId>org.eclipse.gemini.blueprint</groupId>
-        <version>3.0.1.BUILD-SNAPSHOT</version>
+        <version>4.0.0.BUILD-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -45,8 +45,8 @@
 
         <dependency>
             <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-all</artifactId>
-            <version>5.2</version>
+            <artifactId>asm</artifactId>
+            <version>9.7</version>
         </dependency>
 
         <dependency>
@@ -65,20 +65,14 @@
 
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <artifactId>osgi.core</artifactId>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
 
         <dependency>
-            <groupId>org.eclipse.birt.runtime</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.knopflerfish</groupId>
-            <artifactId>framework</artifactId>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.core.runtime</artifactId>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
@@ -106,13 +100,12 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
-                        <forkMode>pertest</forkMode>
-                        <systemProperties>
-                            <property>
-                                <name>org.eclipse.gemini.blueprint.test.framework</name>
-                                <value>${osgi.test.platform}</value>
-                            </property>
-                        </systemProperties>
+                        <forkCount>1</forkCount>
+                        <reuseForks>false</reuseForks>
+                        <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
+                        <systemPropertyVariables>
+                            <org.eclipse.gemini.blueprint.test.framework>${osgi.test.platform}</org.eclipse.gemini.blueprint.test.framework>
+                        </systemPropertyVariables>
                     </configuration>
                 </plugin>
             </plugins>
@@ -135,7 +128,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.1</version>
+                <version>3.5.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>

@@ -23,9 +23,7 @@
 	
 	<bean id="factory-component" factory-ref="thread" factory-method="getName"/>
 	
-	<!-- 
 	<bean id="self-reference" class="org.eclipse.gemini.blueprint.blueprint.TestComponent" scope="prototype">
 		<property name="propA" ref="self-reference"/>
 	</bean>
-	 -->
 </blueprint>

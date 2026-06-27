@@ -19,9 +19,18 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import org.easymock.IMocksControl;
 import org.eclipse.gemini.blueprint.context.support.BundleContextAwareProcessor;
@@ -34,7 +43,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
@@ -43,7 +51,7 @@ import org.eclipse.gemini.blueprint.mock.MockBundleContext;
 /**
  * @author Costin Leau
  */
-public class ConfigPropertiesHandlerTest extends TestCase {
+public class ConfigPropertiesHandlerTest {
 
     private GenericApplicationContext appContext;
 
@@ -59,8 +67,8 @@ public class ConfigPropertiesHandlerTest extends TestCase {
     private Configuration cfg;
     private ManagedService msCallback;
 
-
-    protected void setUp() throws Exception {
+    @Before
+    public void setup() throws Exception {
         adminControl = createControl();
         admin = adminControl.createMock(ConfigurationAdmin.class);
         cfg = createMock(Configuration.class);
@@ -101,15 +109,18 @@ public class ConfigPropertiesHandlerTest extends TestCase {
         appContext.refresh();
     }
 
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         adminControl.verify();
     }
 
+    @Test
     public void testPropertiesLazyInit() throws Exception {
         adminControl.reset();
         adminControl.replay();
     }
 
+    @Test
     public void testBlankConfigProperties() throws Exception {
         config.put("Spring", "Source");
         Object bean = appContext.getBean("named");
@@ -117,6 +128,7 @@ public class ConfigPropertiesHandlerTest extends TestCase {
         assertEquals(config, bean);
     }
 
+    @Test
     public void testPropertiesWithDefaultsAndNoOverride() throws Exception {
         persistentId = "noLocalOverride";
 
@@ -138,6 +150,7 @@ public class ConfigPropertiesHandlerTest extends TestCase {
         assertEquals(3, props.entrySet().size());
     }
 
+    @Test
     public void testPropertiesWithDefaultsAndOverride() throws Exception {
         persistentId = "localOverride";
 
@@ -160,31 +173,7 @@ public class ConfigPropertiesHandlerTest extends TestCase {
         assertEquals(3, props.entrySet().size());
     }
 
-    // disabled until custom attributes are enabled again
-    public void tstPropertiesWithPropRef() throws Exception {
-        persistentId = "custom-attributes";
-
-        adminControl.reset();
-        expect(admin.getConfiguration(persistentId)).andReturn(cfg).atLeastOnce();
-        adminControl.replay();
-
-        config.put("foo", "foo");
-        config.put("Spring", "Source");
-        Object bean = appContext.getBean(persistentId);
-        BeanDefinition bd = appContext.getBeanDefinition(persistentId);
-        System.out.println(bd.getScope());
-        assertTrue(bean instanceof Properties);
-        Properties props = (Properties) bean;
-        assertFalse(config.equals(bean));
-        // the local property is still present
-        assertEquals("bar", props.getProperty("foo"));
-        // the CM props are still there
-        assertTrue(props.containsKey("kry"));
-        // and so are the local props
-        assertTrue(props.containsKey("Spring"));
-        assertEquals(3, props.entrySet().size());
-    }
-
+    @Test
     public void testDynamicNoOverride() throws Exception {
         persistentId = "noLocalOverride";
         String beanId = "dynamic-noOverride";
@@ -226,6 +215,7 @@ public class ConfigPropertiesHandlerTest extends TestCase {
         assertEquals("pton", props.getProperty("kry"));
     }
 
+    @Test
     public void testDynamicOverride() throws Exception {
         persistentId = "localOverride";
         String beanId = "dynamic-override";
@@ -266,6 +256,7 @@ public class ConfigPropertiesHandlerTest extends TestCase {
         assertEquals("pton", props.getProperty("kry"));
     }
 
+    @Test
     public void testExtendedProperties() throws Exception {
         persistentId = "noLocalOverride";
         String beanId = "dynamic-noOverride";

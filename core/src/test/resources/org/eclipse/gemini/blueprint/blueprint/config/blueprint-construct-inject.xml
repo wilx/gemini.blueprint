@@ -2,7 +2,7 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
 	<bean id="constructorAssign" class="org.eclipse.gemini.blueprint.blueprint.TestComponent">
-		<argument value="XYZ"/>
+		<argument type="java.lang.String" value="XYZ"/>
 	</bean>
 
 	<!-- Wrapped char array -->

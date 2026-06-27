@@ -15,7 +15,9 @@
 
 package org.eclipse.gemini.blueprint.extensions.annotation;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.easymock.EasyMock;
 import org.easymock.internal.MocksControl;
 import org.eclipse.gemini.blueprint.mock.MockBundleContext;
@@ -33,6 +35,14 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
 import org.springframework.util.ReflectionUtils.FieldFilter;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -43,15 +53,14 @@ import java.util.SortedSet;
 /**
  * @author Andy Piper
  */
-public class OsgiServiceAnnotationTest extends TestCase {
+public class OsgiServiceAnnotationTest {
 
 	private ServiceReferenceInjectionBeanPostProcessor processor;
 
 	private BundleContext context;
 
-
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setup() throws Exception {
 		processor = new ServiceReferenceInjectionBeanPostProcessor();
 		context = new MockBundleContext();
 		processor.setBundleContext(context);
@@ -60,16 +69,14 @@ public class OsgiServiceAnnotationTest extends TestCase {
 		processor.setBeanFactory(factory);
 	}
 
-	/**
-	 * Disabled since it doesn't work as we can't proxy final classes.
-	 */
+	@Test
 	public void tstGetServicePropertySetters() throws Exception {
 		OsgiServiceProxyFactoryBean pfb = new OsgiServiceProxyFactoryBean();
 		Method setter = AnnotatedBean.class.getMethod("setStringType", new Class<?>[] { String.class });
 		ServiceReference ref = AnnotationUtils.getAnnotation(setter, ServiceReference.class);
 
 		processor.getServiceProperty(pfb, ref, setter.getParameterTypes()[0], null);
-		Class<?>[] intfs = (Class[]) getPrivateProperty(pfb, "serviceTypes");
+		Class<?>[] intfs = (Class[]) getPrivateProperty(pfb, "interfaces");
 		assertEquals(intfs[0], String.class);
 
 		setter = AnnotatedBean.class.getMethod("setIntType", new Class<?>[] { Integer.TYPE });
@@ -77,11 +84,12 @@ public class OsgiServiceAnnotationTest extends TestCase {
 
 		pfb = new OsgiServiceProxyFactoryBean();
 		processor.getServiceProperty(pfb, ref, setter.getParameterTypes()[0], null);
-		intfs = (Class[]) getPrivateProperty(pfb, "serviceTypes");
+		intfs = (Class[]) getPrivateProperty(pfb, "interfaces");
 		assertEquals(intfs[0], Integer.TYPE);
 
 	}
 
+	@Test
 	public void testGetServicePropertyCardinality() throws Exception {
 		OsgiServiceProxyFactoryBean pfb = new OsgiServiceProxyFactoryBean();
 		Method setter = AnnotatedBean.class.getMethod("setAnnotatedBeanTypeWithCardinality1_1",
@@ -98,6 +106,7 @@ public class OsgiServiceAnnotationTest extends TestCase {
 		assertFalse(pfb.getAvailability() == Availability.MANDATORY);
 	}
 
+	@Test
 	public void testProperMultiCardinality() throws Exception {
 		OsgiServiceCollectionProxyFactoryBean pfb = new OsgiServiceCollectionProxyFactoryBean();
 
@@ -115,6 +124,7 @@ public class OsgiServiceAnnotationTest extends TestCase {
 		assertTrue(pfb.getAvailability() == Availability.MANDATORY);
 	}
 
+	@Test
 	public void testErrorMultiCardinality() throws Exception {
 		OsgiServiceCollectionProxyFactoryBean pfb = new OsgiServiceCollectionProxyFactoryBean();
 
@@ -130,6 +140,7 @@ public class OsgiServiceAnnotationTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testGetServicePropertyClassloader() throws Exception {
 		OsgiServiceProxyFactoryBean pfb = new OsgiServiceProxyFactoryBean();
 		Method setter = AnnotatedBean.class.getMethod("setAnnotatedBeanTypeWithClassLoaderClient",
@@ -154,6 +165,7 @@ public class OsgiServiceAnnotationTest extends TestCase {
 		assertEquals(pfb.getImportContextClassLoader(), ImportContextClassLoaderEnum.SERVICE_PROVIDER);
 	}
 
+	@Test
 	public void testGetServicePropertyBeanName() throws Exception {
 		OsgiServiceProxyFactoryBean pfb = new OsgiServiceProxyFactoryBean();
 		Method setter = AnnotatedBean.class.getMethod("setAnnotatedBeanTypeWithBeanName",
@@ -165,6 +177,7 @@ public class OsgiServiceAnnotationTest extends TestCase {
 		assertEquals(beanName, "myBean");
 	}
 
+	@Test
 	public void testGetServicePropertyFilter() throws Exception {
 		OsgiServiceProxyFactoryBean pfb = new OsgiServiceProxyFactoryBean();
 		Method setter = AnnotatedBean.class.getMethod("setAnnotatedBeanTypeWithFilter",
@@ -176,6 +189,7 @@ public class OsgiServiceAnnotationTest extends TestCase {
 		assertEquals(filter, "(wooey=fooo)");
 	}
 
+	@Test
 	public void testGetServicePropertyServiceClass() throws Exception {
 		OsgiServiceProxyFactoryBean pfb = new OsgiServiceProxyFactoryBean();
 		Method setter = AnnotatedBean.class.getMethod("setAnnotatedBeanTypeWithServiceType",
@@ -186,6 +200,7 @@ public class OsgiServiceAnnotationTest extends TestCase {
 		assertEquals(intfs[0], Object.class);
 	}
 
+	@Test
 	public void testGetServicePropertyComplex() throws Exception {
 		OsgiServiceProxyFactoryBean pfb = new OsgiServiceProxyFactoryBean();
 		Method setter = AnnotatedBean.class.getMethod("setAnnotatedBeanTypeComplex",
@@ -202,6 +217,7 @@ public class OsgiServiceAnnotationTest extends TestCase {
 		assertEquals(beanName, "myBean");
 	}
 
+	@Test
 	public void testServiceBeanInjection() throws Exception {
 		ServiceBean bean = new ServiceBean();
 		final MyService bean1 = new MyService() {
@@ -250,6 +266,7 @@ public class OsgiServiceAnnotationTest extends TestCase {
 		factoryControl.verify();
 	}
 
+	@Test
 	public void testServiceBeanWithAnnotatedFieldsInjection() throws Exception {
 		ServiceBeanWithAnnotatedFields bean = new ServiceBeanWithAnnotatedFields();
 		final MyService bean1 = new MyService() {
@@ -294,6 +311,7 @@ public class OsgiServiceAnnotationTest extends TestCase {
 		assertSame(bean2.toString(), bean.getSerializableBean().toString());
 	}
 
+	@Test
 	public void testServiceFactoryBeanNotInjected() throws Exception {
 		ServiceFactoryBean bean = new ServiceFactoryBean();
 		final MyService bean1 = new MyService() {
@@ -333,6 +351,7 @@ public class OsgiServiceAnnotationTest extends TestCase {
 		assertNull(bean.getSerializableBean());
 	}
 
+	@Test
 	public void testServiceFactoryBeanInjected() throws Exception {
 		ServiceFactoryBean bean = new ServiceFactoryBean();
 		final MyService bean1 = new MyService() {
@@ -382,6 +401,7 @@ public class OsgiServiceAnnotationTest extends TestCase {
 		assertSame(bean2.toString(), ssb.toString());
 	}
 
+	@Test
 	public void testServiceBeanInjectedValues() throws Exception {
 		ServiceBean bean = new ServiceBean();
 		final MyService bean1 = new MyService() {
