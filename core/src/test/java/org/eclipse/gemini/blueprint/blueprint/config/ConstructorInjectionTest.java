@@ -76,8 +76,7 @@ public class ConstructorInjectionTest {
 	}
 
 	@Test
-	@Ignore
-	public void tstCtrAssign() throws Exception {
+		public void tstCtrAssign() throws Exception {
 		Object propA = getPropA("constructorAssign");
 	}
 

@@ -69,18 +69,14 @@ public class OsgiServiceAnnotationTest {
 		processor.setBeanFactory(factory);
 	}
 
-	/**
-	 * Disabled since it doesn't work as we can't proxy final classes.
-	 */
 	@Test
-	@Ignore
 	public void tstGetServicePropertySetters() throws Exception {
 		OsgiServiceProxyFactoryBean pfb = new OsgiServiceProxyFactoryBean();
 		Method setter = AnnotatedBean.class.getMethod("setStringType", new Class<?>[] { String.class });
 		ServiceReference ref = AnnotationUtils.getAnnotation(setter, ServiceReference.class);
 
 		processor.getServiceProperty(pfb, ref, setter.getParameterTypes()[0], null);
-		Class<?>[] intfs = (Class[]) getPrivateProperty(pfb, "serviceTypes");
+		Class<?>[] intfs = (Class[]) getPrivateProperty(pfb, "interfaces");
 		assertEquals(intfs[0], String.class);
 
 		setter = AnnotatedBean.class.getMethod("setIntType", new Class<?>[] { Integer.TYPE });
@@ -88,7 +84,7 @@ public class OsgiServiceAnnotationTest {
 
 		pfb = new OsgiServiceProxyFactoryBean();
 		processor.getServiceProperty(pfb, ref, setter.getParameterTypes()[0], null);
-		intfs = (Class[]) getPrivateProperty(pfb, "serviceTypes");
+		intfs = (Class[]) getPrivateProperty(pfb, "interfaces");
 		assertEquals(intfs[0], Integer.TYPE);
 
 	}

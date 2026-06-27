@@ -270,6 +270,6 @@ public class OsgiBundleXmlApplicationContext extends AbstractDelegatedExecutionA
 
 	@Override
 	public void destroy() throws Exception {
-
+		close();
 	}
 }

@@ -43,7 +43,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
@@ -162,33 +161,6 @@ public class ConfigPropertiesHandlerTest {
         config.put("foo", "foo");
         config.put("Spring", "Source");
         Object bean = appContext.getBean(persistentId);
-        assertTrue(bean instanceof Properties);
-        Properties props = (Properties) bean;
-        assertFalse(config.equals(bean));
-        // the local property is still present
-        assertEquals("bar", props.getProperty("foo"));
-        // the CM props are still there
-        assertTrue(props.containsKey("kry"));
-        // and so are the local props
-        assertTrue(props.containsKey("Spring"));
-        assertEquals(3, props.entrySet().size());
-    }
-
-    // disabled until custom attributes are enabled again
-    @Test
-    @Ignore
-    public void testPropertiesWithPropRef() throws Exception {
-        persistentId = "custom-attributes";
-
-        adminControl.reset();
-        expect(admin.getConfiguration(persistentId)).andReturn(cfg).atLeastOnce();
-        adminControl.replay();
-
-        config.put("foo", "foo");
-        config.put("Spring", "Source");
-        Object bean = appContext.getBean(persistentId);
-        BeanDefinition bd = appContext.getBeanDefinition(persistentId);
-        System.out.println(bd.getScope());
         assertTrue(bean instanceof Properties);
         Properties props = (Properties) bean;
         assertFalse(config.equals(bean));

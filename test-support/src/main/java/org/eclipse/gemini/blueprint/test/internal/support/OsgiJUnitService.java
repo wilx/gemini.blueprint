@@ -14,15 +14,19 @@
 
 package org.eclipse.gemini.blueprint.test.internal.support;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.eclipse.gemini.blueprint.test.internal.OsgiJUnitTest;
+import org.eclipse.gemini.blueprint.test.internal.holder.HolderLoader;
+import org.eclipse.gemini.blueprint.test.internal.holder.OsgiTestInfoHolder;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
+import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 import org.osgi.framework.BundleContext;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * OSGi service for executing JUnit tests.
@@ -32,40 +36,70 @@ import org.osgi.framework.BundleContext;
  */
 public class OsgiJUnitService extends Runner {
 
-	private Class<?> test;
-
 	private BundleContext bc;
-
-	public OsgiJUnitService(Class<?> test) {
-		super();
-		this.test = test;
-	}
 
 	@Override
 	public Description getDescription() {
-		return Description.createTestDescription(test, "OsgiJUnitService");
+		OsgiTestInfoHolder holder = HolderLoader.INSTANCE.getHolder();
+		String testClassName = holder.getTestClassName();
+		String testMethodName = holder.getTestMethodName();
+		return Description.createTestDescription(testClassName == null ? OsgiJUnitService.class.getName() : testClassName,
+				testMethodName == null ? "OsgiJUnitService" : testMethodName);
 	}
 
 	@Override
 	public void run(RunNotifier notifier) {
-		System.out.println("Running the tests from OsgiJUnitService: " + test);
+		OsgiTestInfoHolder holder = HolderLoader.INSTANCE.getHolder();
+		String testClassName = holder.getTestClassName();
+		String testMethodName = holder.getTestMethodName();
+		Description description = Description.createTestDescription(testClassName, testMethodName);
+		notifier.fireTestStarted(description);
 		try {
-			OsgiJUnitTest testObject = (OsgiJUnitTest) test.newInstance();
-			for (Method method : test.getMethods()) {
-				if (method.isAnnotationPresent(Test.class) && !method.isAnnotationPresent(Ignore.class)) {
-					notifier.fireTestStarted(Description.createTestDescription(test, method.getName()));
-					try {
-						testObject.injectBundleContext(bc);
-						testObject.osgiSetUp();
-						method.invoke(testObject);
-					} finally {
-						testObject.osgiTearDown();
-					}
-					notifier.fireTestFinished(Description.createTestDescription(test, method.getName()));
+			Class<?> testClass = bc.getBundle().loadClass(testClassName);
+			Object testObject = testClass.getDeclaredConstructor().newInstance();
+			Method testMethod = ReflectionUtils.findMethod(testClass, testMethodName);
+			if (testMethod == null) {
+				throw new IllegalArgumentException("no test method [" + testMethodName + "] found on " + testClass);
+			}
+			if (testMethod.isAnnotationPresent(Ignore.class)) {
+				notifier.fireTestIgnored(description);
+				return;
+			}
+			invoke(testClass, testObject, "injectBundleContext", new Class<?>[] { BundleContext.class }, bc);
+			invoke(testClass, testObject, "osgiSetUp", new Class<?>[0]);
+			try {
+				if (testMethod.isAnnotationPresent(Test.class)) {
+					ReflectionUtils.makeAccessible(testMethod);
+					testMethod.invoke(testObject);
+				}
+				else {
+					invoke(testClass, testObject, "osgiRunTest", new Class<?>[0]);
 				}
 			}
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+			finally {
+				invoke(testClass, testObject, "osgiTearDown", new Class<?>[0]);
+			}
+		}
+		catch (Throwable ex) {
+			notifier.fireTestFailure(new Failure(description, ex));
+		}
+		finally {
+			notifier.fireTestFinished(description);
+		}
+	}
+
+	private void invoke(Class<?> testClass, Object testObject, String methodName, Class<?>[] parameterTypes,
+			Object... arguments) throws Throwable {
+		Method method = ReflectionUtils.findMethod(testClass, methodName, parameterTypes);
+		if (method == null) {
+			throw new IllegalArgumentException("no method [" + methodName + "] found on " + testClass);
+		}
+		ReflectionUtils.makeAccessible(method);
+		try {
+			method.invoke(testObject, arguments);
+		}
+		catch (InvocationTargetException ex) {
+			throw ex.getTargetException();
 		}
 	}
 

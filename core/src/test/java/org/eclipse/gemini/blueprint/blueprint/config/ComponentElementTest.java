@@ -16,7 +16,7 @@ package org.eclipse.gemini.blueprint.blueprint.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -24,10 +24,10 @@ import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.gemini.blueprint.blueprint.TestComponent;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
@@ -112,9 +112,7 @@ public class ComponentElementTest {
 	}
 
 	@Test
-	@Ignore
 	public void tstSelfReferencePrototypeBean() throws Exception {
-		TestComponent cmpn = context.getBean("self-reference", TestComponent.class);
-		assertSame(cmpn, cmpn.getPropA());
+		assertThrows(BeanCreationException.class, () -> context.getBean("self-reference", TestComponent.class));
 	}
 }

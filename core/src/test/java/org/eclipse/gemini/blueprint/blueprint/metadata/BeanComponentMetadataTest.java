@@ -229,13 +229,12 @@ public class BeanComponentMetadataTest extends BaseMetadataTest {
 	}
 
 	@Test
-	@Ignore
-	public void testPrimitiveArray() throws Exception {
+		public void testPrimitiveArray() throws Exception {
 		BeanMetadata localMetadata = getLocalMetadata("primitiveArray");
 		List<BeanArgument> args = localMetadata.getArguments();
 		for (BeanArgument beanArgument : args) {
 			CollectionMetadata mt = (CollectionMetadata) beanArgument.getValue();
-			assertNull(mt.getValueType());
+			assertEquals("int", mt.getValueType());
 		}
 	}
 

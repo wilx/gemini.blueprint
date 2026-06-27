@@ -117,9 +117,6 @@ public class BundleClassPathTest extends BaseIntegrationTest {
 		assertNull("findEntries doesn't work on bundle classpath entries", enm);
 	}
 
-	// disabled as it fails on the server for some reason (linux + equinox)
-	// TODO: investigate
-	@Ignore
 	@Test
 	public void tstFindEntriesOnFilePresentMultipleTimesOnTheClassPathAndInsideTheBundle() throws Exception {
 		System.out.println("running test" + this.getName());
@@ -145,8 +142,6 @@ public class BundleClassPathTest extends BaseIntegrationTest {
 		assertNull("findEntries doesn't work on bundle classpath entries", url);
 	}
 
-	// fails on Felix + KF
-	@Ignore
 	@Test
 	public void tstFindEntriesOnMetaInfEntryOnSystemBundle() throws Exception {
 		Bundle sysBundle = bundleContext.getBundle(0);
@@ -154,8 +149,6 @@ public class BundleClassPathTest extends BaseIntegrationTest {
 		assertNotNull("system bundle doesn't return META-INF", enm);
 	}
 
-	// fails on Felix + KF
-	@Ignore
 	@Test
 	public void tstGetEntryOnMetaInfEntryOnSystemBundle() throws Exception {
 		Bundle sysBundle = bundleContext.getBundle(0);
@@ -163,8 +156,6 @@ public class BundleClassPathTest extends BaseIntegrationTest {
 		assertNotNull("system bundle doesn't consider META-INF on classpath", url);
 	}
 
-	// simple debugging test (no need to keep it running)
-	@Ignore
 	@Test
 	public void tstConnectionToJarOnClassPath() throws Exception {
 		URL url = bundle.getEntry("bundleclasspath/simple.jar");
