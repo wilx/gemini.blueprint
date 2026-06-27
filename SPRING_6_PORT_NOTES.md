@@ -1,15 +1,15 @@
 # Spring 6 / Java 17 Port Notes
 
-This branch ports Gemini Blueprint to Spring Framework 6.2.19 with Java 17 bytecode (`maven.compiler.release=17`).
+This branch ports Gemini Blueprint to Java 17 bytecode (`maven.compiler.release=17`) and the Spring Framework 6.2 line.
 
 ## Dependency choices
 
-* Spring Framework: official `org.springframework` artifacts at `6.2.19`.
+* Spring Framework: Apache ServiceMix OSGi-wrapped Spring bundles at `6.2.8_1`, keeping Spring Framework dependencies consumable as OSGi bundles.
 * OSGi API: `org.osgi:osgi.core:8.0.0`, with compendium APIs kept at `osgi.cmpn:7.0.0` where the project still uses legacy compendium packages.
 * Equinox: Eclipse platform runtime `3.31.0` for the test platform.
 * Felix: `org.apache.felix.main:6.0.0`.
 
-Official Spring Framework artifacts are used because Spring 6.2.19 is newer than the latest available Apache ServiceMix wrapped Spring 6.2 bundles (`6.2.8_1` as of this port). Gemini Blueprint's own bundles keep explicit Spring import ranges of `[6.2.0,7)`.
+The available ServiceMix Spring 6.2 wrapped bundles currently top out at `6.2.8_1`, so the port keeps those OSGi bundle artifacts instead of using plain `org.springframework` jars. Gemini Blueprint's own bundles keep explicit Spring import ranges of `[6.2.0,7)`.
 
 ## Java SecurityManager
 
