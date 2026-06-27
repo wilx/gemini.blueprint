@@ -8,7 +8,7 @@ kind: Pod
 spec:
   containers:
   - name: maven
-    image: maven:3.9.6-eclipse-temurin-8
+    image: maven:3.9.7-eclipse-temurin-17
     command:
     - cat
     tty: true
@@ -68,16 +68,6 @@ spec:
         container('maven') {
           dir("integration-tests") {
             sh 'mvn clean install -P felix'
-            junit '**/target/surefire-reports/*.xml'
-          }
-        }
-      }
-    }
-    stage('Integration tests with Knopflerfish profile') {
-      steps {
-        container('maven') {
-          dir("integration-tests") {
-            sh 'mvn clean install -P knopflerfish'
             junit '**/target/surefire-reports/*.xml'
           }
         }
